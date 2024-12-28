@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Recipe Keeper</title>
+</head>
+<body>
+    <h1>Recipe Keeper</h1>
+    <h2 class="h2-style">YOUR FRIEND IN THE KITCHEN</h2>
+    <hr>
+    <div class="container">
+        <div class="form-container">
+            <h2>Add Recipe</h2>
+            <form id="recipeForm">
+                <label for="name">Recipe Name:</label><br>
+                <input type="text" id="name" placeholder="Enter your recipe name" required><br>
+                <label for="ingredients">Ingredients:</label><br>
+                <textarea id="ingredients" rows="4" cols="35" placeholder="List ingredients with comma" required></textarea><br>
+                <label for="steps">Steps for Preparation:</label><br>
+                <textarea id="steps" rows="4" cols="35" placeholder="Steps for preparation" required></textarea><br>
+                <label for="imageurl">Image URL:</label><br>
+                <input type="text" id="imageurl" placeholder="Enter recipe photo URL" ><br>
+                <input type="submit" value="Add Recipe">
+            </form>
+            <div id="message" style="display: none;color: green;margin-top: 10px;"></div>
+        </div>
+        <div class="receipe-container" id="receipearea">
+            <h2>Your Recipes</h2>
+        </div>
+    </div>
+
+    <script>
+        // Select elements
+        let recipeForm = document.getElementById('recipeForm');
+        let recipes = [];
+        let recipeName = document.getElementById('name');
+        let ingredients = document.getElementById('ingredients');
+        let steps = document.getElementById('steps');
+        let imageurl = document.getElementById('imageurl');
+        let recipeArea = document.getElementById('receipearea');
+        // Load recipes from localStorage on page load
+        let messageElement = document.getElementById("message")
+
+    async function fetchImageForRecipe(receipeName){
+        const apiKey="AJNVqFSrR9XHM1oM0lKSDkIunY-6-g86TjSp8QE3suI"
+        const query= receipeName
+        const response = await fetch(
+            `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&client_id=${apiKey}`
+    );
+        if (response.ok){
+            const data = await response.json();
+            if(data.results && data.results.length > 0){
+                return data.results[0].urls.small;
+            }
+
+        }
+        return null;
+    }
+    function showMessage(text,duration= 3000){
+        messageElement.textContent = text;
+        messageElement.style.display = "block";
+        setTimeout(()=>{
+            messageElement.style.display = "none";
+        },duration);
+
+    }
+    function loadRecipes() {
+        let storedRecipes = localStorage.getItem('recipes');
+        if (storedRecipes) {
+            recipes = JSON.parse(storedRecipes);
+        }
+    }
+
+    // Save recipes to localStorage
+    function saveRecipes() {
+        localStorage.setItem('recipes', JSON.stringify(recipes));
+    }
+
+        // Function to delete a recipe
+        function deleteRecipe(index) {
+            // Remove recipe from the array
+            recipes.splice(index, 1);
+            // Refresh the displayed recipes
+            saveRecipes();
+            refreshRecipes();
+        }
+
+        // Function to display a single recipe
+      async  function displayRecipe(recipe, index) {
+            // Create a div for the new recipe
+            let recipeDiv = document.createElement('div');
+            recipeDiv.style.border = "1px solid black";
+            recipeDiv.style.margin = "1rem 0";
+            recipeDiv.style.padding = "1rem";
+            recipeDiv.style.borderRadius = "5px";
+            recipeDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+           
+            // Add recipe details
+            recipeDiv.innerHTML = `
+                <h3>${recipe.name}</h3>
+                <p><strong>Ingredients:</strong> ${recipe.ingredients}</p>
+                <p><strong>Steps:</strong> ${recipe.steps}</p>
+                ${recipe.imageurl ? `<img src="${recipe.imageurl}" alt="${recipe.name}" style="width:100%;max-width:300px;border-radius:5px;">` : ''}
+            `;
+
+            // Create delete button
+            let deleteButton = document.createElement('button');
+            deleteButton.textContent = "Delete";
+deleteButton.style.marginTop = "10px";
+deleteButton.style.padding = "10px 20px";
+deleteButton.style.backgroundColor = "#ff4d4d";
+deleteButton.style.color = "#ffffff";
+deleteButton.style.border = "none";
+deleteButton.style.borderRadius = "5px";
+deleteButton.style.cursor = "pointer";
+deleteButton.style.transition = "background-color 0.3s ease, transform 0.2s ease";
+            deleteButton.onclick = function () {
+                deleteRecipe(index);
+            };
+
+            // Append delete button to the recipe div
+            recipeDiv.appendChild(deleteButton);
+
+            // Append the recipe div to the display area
+            recipeArea.appendChild(recipeDiv);
+        }
+
+        // Function to refresh all recipes
+        function refreshRecipes() {
+            // Clear the current display
+            recipeArea.innerHTML = '<h2>Your Recipes</h2>';
+            // Display each recipe in the array
+        
+            recipes.forEach((recipe, index) => {
+                displayRecipe(recipe, index);
+            });
+        }
+
+        // Add event listener for form submission
+        recipeForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+
+            // Capture input values
+            let enteredRecipeName = recipeName.value;
+            let enteredIngredients = ingredients.value;
+            let enteredSteps = steps.value;
+            let enteredImageUrl = imageurl.value;
+            if(!enteredImageUrl){
+                enteredImageUrl = await fetchImageForRecipe(enteredRecipeName);
+            }
+            // Create new recipe object
+            let newRecipe = {
+                name: enteredRecipeName,
+                ingredients: enteredIngredients,
+                steps: enteredSteps,
+                imageurl: enteredImageUrl
+            };
+
+            recipes.push(newRecipe); // Add new recipe to the array
+        saveRecipes(); // Save updated array to localStorage
+        refreshRecipes(); // Refresh the displayed recipes
+        recipeForm.reset(); // Reset the form
+            showMessage("Receipe addded Successfully")
+        });
+          // Initialize the app
+    loadRecipes();  
+    refreshRecipes();
+
+    </script>
+</body>
+</html>

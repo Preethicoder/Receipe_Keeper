@@ -1,0 +1,72 @@
+h1,h2{
+    text-align: center;
+ 
+}
+.h2-style{
+    font-weight: 200; 
+    font-size: 1rem;
+    color: #555; 
+}
+hr {
+    border: none; /* Remove the default border style */
+    height: 2px; /* Set a thicker line */
+    background-color: black; /* Set a visible color */
+    margin: 1rem 0; /* Add space above and below the line */
+}
+.container{
+    display: flex;
+            flex-direction: row; /* Ensure the child divs are displayed side by side */
+            /* Add space between the divs */
+           
+            gap: 2rem; /* Add space between the divs */
+            margin: 1rem 2rem;
+}
+.form-container{
+ border: 2px solid black;
+ 
+ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+ width: 30%;
+ padding: 2rem;
+ margin: 2rem 1rem;
+}
+.receipe-container{
+    border: 2px solid black;
+    
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    width: 30%;
+    padding: 2rem;
+    margin: 2rem 1rem;
+}
+textarea, input {
+    display: block;
+    width: 90%;
+    margin-bottom: 1rem;
+}
+label {
+    font-weight: bold; /* Highlight labels for better readability */
+    margin-bottom: 0.5rem;
+}
+input[type="submit"] {
+    background-color: #1b294c;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: center;
+}
+input[type="submit"]:hover {
+    background-color:rgb(3, 77, 86);
+}
+.receipe-container{
+   text-align: center;
+
+}
+@media (max-width:768px){
+    .container{
+        flex-direction: column;
+    }
+    .form-container,.receipe-container{
+        width: 100%;
+    }
+}
