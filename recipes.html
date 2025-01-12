@@ -22,6 +22,8 @@
                 <textarea id="steps" rows="4" cols="35" placeholder="Steps for preparation" required></textarea><br>
                 <label for="imageurl">Image URL:</label><br>
                 <input type="text" id="imageurl" placeholder="Enter recipe photo URL" ><br>
+                <label for="imagefile">Upload Image:</label><br>
+                <input type="file" id="imagefile" accept="image/*"><br>
                 <input type="submit" value="Add Recipe">
             </form>
             <div id="message" style="display: none;color: green;margin-top: 10px;"></div>
@@ -42,6 +44,16 @@
         let recipeArea = document.getElementById('receipearea');
         // Load recipes from localStorage on page load
         let messageElement = document.getElementById("message")
+        let imageFileInput = document.getElementById('imagefile');
+    
+    function getBase64(file){
+        return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result); // Base64 string
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+    }
 
     async function fetchImageForRecipe(receipeName){
         const apiKey="AJNVqFSrR9XHM1oM0lKSDkIunY-6-g86TjSp8QE3suI"
@@ -117,7 +129,10 @@ deleteButton.style.borderRadius = "5px";
 deleteButton.style.cursor = "pointer";
 deleteButton.style.transition = "background-color 0.3s ease, transform 0.2s ease";
             deleteButton.onclick = function () {
+                var result = confirm("Are you sure, you want to delete")
+                if(result){
                 deleteRecipe(index);
+                }
             };
 
             // Append delete button to the recipe div
@@ -147,15 +162,20 @@ deleteButton.style.transition = "background-color 0.3s ease, transform 0.2s ease
             let enteredIngredients = ingredients.value;
             let enteredSteps = steps.value;
             let enteredImageUrl = imageurl.value;
-            if(!enteredImageUrl){
+            let uploadedImage = null;
+            if (imageFileInput.files.length > 0) {
+        uploadedImage = await getBase64(imageFileInput.files[0]);
+    }
+            if(!enteredImageUrl && !uploadedImage){
                 enteredImageUrl = await fetchImageForRecipe(enteredRecipeName);
             }
+
             // Create new recipe object
             let newRecipe = {
                 name: enteredRecipeName,
                 ingredients: enteredIngredients,
                 steps: enteredSteps,
-                imageurl: enteredImageUrl
+                imageurl: enteredImageUrl || uploadedImage
             };
 
             recipes.push(newRecipe); // Add new recipe to the array
